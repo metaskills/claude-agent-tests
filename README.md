@@ -26,15 +26,3 @@ node agent.ts "What did astronauts find on Mars?"
 # Run demo mode
 node agent.ts
 ```
-
-## How It Works
-
-```
-Your Code → query() → Claude Code Process → Claude API → Response
-```
-
-The SDK spawns Claude Code as a subprocess. Claude autonomously uses Read/Grep tools to search the knowledge files and answer questions based only on what it finds.
-
-## Architecture
-
-**Direct agent pattern** - Uses built-in tools (Read, Grep, Glob) without custom MCP servers.
