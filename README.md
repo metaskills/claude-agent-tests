@@ -1,10 +1,40 @@
+# Claude Agent SDK - Knowledge Agent
 
-# Claude Agent SDK Test #01
+## What This Does
 
-Please design a simple knowledge agent using fictious documents located in this current working directory. The agent should only speak to the topics located in these files and read them as needed to answer questions.
+A simple agent that answers questions exclusively from three local markdown files:
 
-  1. coffee-brewing-guide.md - A comprehensive guide covering different coffee brewing methods, equipment, and techniques
-  2. understanding-websockets.md - A technical overview of WebSocket protocol, use cases, and implementation patterns
-  3. space-exploration-history.md - A historical overview of humanity's journey into space from early rockets to modern missions
+1. **[coffee-brewing-guide.md](knowledge/coffee-brewing-guide.md)** - Coffee brewing methods and techniques
+2. **[understanding-websockets.md](knowledge/understanding-websockets.md)** - WebSocket protocol documentation
+3. **[space-exploration-history.md](knowledge/space-exploration-history.md)** - Space exploration history
 
-This is a new node project in an empty directory. 
+The agent uses the Claude Agent SDK to autonomously read and search these files to answer your questions. It will NOT use Claude's training data - only information from these files.
+
+**Note**: The knowledge files contain whimsical fictional facts mixed with real information (dancing goats discovering coffee, dolphins inventing the V60, space berries on Mars). The agent correctly identifies these as fictional content.
+
+## Usage
+
+```bash
+# Install dependencies
+npm install
+
+# Ask questions
+node agent.ts "Who discovered coffee?"
+node agent.ts "What makes the V60 special?"
+node agent.ts "What did astronauts find on Mars?"
+
+# Run demo mode
+node agent.ts
+```
+
+## How It Works
+
+```
+Your Code → query() → Claude Code Process → Claude API → Response
+```
+
+The SDK spawns Claude Code as a subprocess. Claude autonomously uses Read/Grep tools to search the knowledge files and answer questions based only on what it finds.
+
+## Architecture
+
+**Direct agent pattern** - Uses built-in tools (Read, Grep, Glob) without custom MCP servers.

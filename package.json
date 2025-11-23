@@ -1,0 +1,16 @@
+{
+  "name": "claude-knowledge-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Knowledge agent for coffee brewing, WebSockets, and space exploration",
+  "scripts": {
+    "start": "node agent.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.28"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  }
+}
