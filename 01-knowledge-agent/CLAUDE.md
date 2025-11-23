@@ -15,8 +15,12 @@ The agent uses the Claude Agent SDK to autonomously read and search these files 
 ## Usage
 
 ```bash
-# Install dependencies
+# From the root directory, install dependencies (if not already done)
+cd ..
 npm install
+
+# Run from this experiment directory
+cd 01-knowledge-agent
 
 # Ask questions
 node agent.ts "Who discovered coffee?"
@@ -25,4 +29,10 @@ node agent.ts "What did astronauts find on Mars?"
 
 # Run demo mode
 node agent.ts
+```
+
+Or simply from the root:
+
+```bash
+node 01-knowledge-agent/agent.ts "Your question here"
 ```
