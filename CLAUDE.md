@@ -6,6 +6,15 @@ A collection of progressive experiments for learning and developing with the [Cl
 
 This repository contains small, focused experiments that demonstrate different capabilities and patterns when building agents with the Claude Agent SDK. Each experiment is self-contained in a numbered directory, progressing from simple to more complex use cases.
 
+## AWS Configuration
+
+All experiments assume AWS Bedrock authentication is configured via environment variables:
+
+- `AWS_BEARER_TOKEN_BEDROCK` - Long-term bearer token for Bedrock access
+- `CLAUDE_CODE_USE_BEDROCK=1` - Enables Bedrock routing
+
+Experiments access these via `process.env` and assume they are set in your shell environment.
+
 ## Development Approach
 
 All experiments are and MUST BE developed using the **`claude-agent-sdk` skill** in Claude Code. This ensures consistent patterns and best practices while providing practical examples for learning.
@@ -22,3 +31,16 @@ Each experiment is fully self-contained with:
 - Supporting files as needed
 
 Each experiment manages its own dependencies independently.
+
+## Testing Bedrock Configuration
+
+To verify your AWS Bedrock setup is working:
+
+```bash
+node 01-knowledge-agent/agent.ts "What is coffee?"
+```
+
+Expected output:
+- Agent reads `coffee-brewing-guide.md`
+- Provides answer about coffee from the knowledge files
+- Completes successfully with agent response
