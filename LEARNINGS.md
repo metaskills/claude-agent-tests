@@ -1,0 +1,78 @@
+
+
+
+
+
+## Explain What Explicit `resume: sessionId` (vs implicit `continue: true`) Means
+
+Explicit resume: sessionId
+
+How it works:
+
+1. First query runs without any session parameters
+2. SDK returns a system message with subtype: 'init' containing a unique session_id
+3. You capture and store this session ID in your code
+4. For subsequent queries, you explicitly pass resume: sessionId in the options
+
+```javascript
+for await (const message of query({ prompt: "Hello", options: {} })) {
+ if (message.type === 'system' && message.subtype === 'init') {
+   capturedSessionId = message.session_id;  // "abc-123-xyz"
+ }
+}
+```
+
+Could save session IDs to disk and resume later, or manage multiple parallel conversations
+
+Implicit continue: true
+
+How it works:
+
+1. SDK automatically tracks the "most recent" session for you
+2. You don't capture or manage session IDs yourself
+3. Just pass continue: true and SDK figures out which session to resume
+
+```javascript
+// First query
+for await (const message of query({ prompt: "Hello", options: {} })) {
+ // Session created automatically
+}
+// Later query - implicitly continue most recent session
+for await (const message of query({
+ prompt: "Continue",
+ options: { continue: true }
+})) {
+ // SDK automatically resumes the most recent session
+}
+```
+
+---
+
+## Explain `maxTurns` Defaults & How the Setting Works
+
+When maxTurns is reached, you receive an SDKResultMessage with:
+
+```javascript
+{
+  type: 'result',
+  subtype: 'error_max_turns',  // Indicates turn limit reached
+  is_error: true,
+  num_turns: 5,                // Number of turns completed
+  duration_ms: 120000,         // Total time spent
+  total_cost_usd: 0.45,        // API costs incurred
+  usage: {                     // Token usage stats
+    input_tokens: 15000,
+    output_tokens: 8000
+  },
+  permission_denials: []       // Any blocked tool calls
+}
+```
+
+| Use Case               | Recommended maxTurns | Rationale                              |
+|------------------------|----------------------|----------------------------------------|
+| CLI chat (single Q&A)  | 1                    | User controls pacing                   |
+| CLI chat (with resume) | 1-3                  | Allow follow-up clarification          |
+| Bug fix                | 5-10                 | Read, edit, test, iterate              |
+| Feature development    | 10-20                | Planning, implementation, verification |
+| Codebase analysis      | 5-15                 | Research across multiple files         |
+| Unlimited exploration  | undefined            | Trust agent stopping conditions        |
