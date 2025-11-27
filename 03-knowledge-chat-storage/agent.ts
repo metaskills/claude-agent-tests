@@ -1,11 +1,8 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { input } from "@inquirer/prompts";
-import { readFile, writeFile } from "fs/promises";
-import { readdirSync, existsSync } from "fs";
+import { readdirSync } from "fs";
 import { join } from "path";
-
-// Session file for persistence
-const SESSION_FILE = ".session";
+import { session } from "./src/session.ts";
 
 // Auto-discover knowledge files
 const knowledgeDir = "knowledge";
@@ -21,24 +18,6 @@ When answering questions:
 1. Determine which file is relevant
 2. Use the Read tool to access it
 3. Answer with citations`;
-
-// Load session ID from disk
-async function loadSession(): Promise<string | undefined> {
-  if (!existsSync(SESSION_FILE)) {
-    return undefined;
-  }
-  try {
-    const sessionId = await readFile(SESSION_FILE, "utf-8");
-    return sessionId.trim();
-  } catch {
-    return undefined;
-  }
-}
-
-// Save session ID to disk
-async function saveSession(sessionId: string): Promise<void> {
-  await writeFile(SESSION_FILE, sessionId, "utf-8");
-}
 
 // Process a single turn with the agent
 async function processTurn(
@@ -90,11 +69,8 @@ async function runREPL(): Promise<void> {
   // Check for --resume flag
   const shouldResume = process.argv.includes("--resume");
 
-  let sessionId: string | undefined;
-
   if (shouldResume) {
-    sessionId = await loadSession();
-    if (sessionId) {
+    if (session.getId()) {
       console.log("📝 Resuming previous session\n");
     } else {
       console.log("⚠️  No saved session found, starting new session\n");
@@ -119,8 +95,8 @@ async function runREPL(): Promise<void> {
 
     if (trimmed) {
       try {
-        await processTurn(trimmed, sessionId);
-        sessionId = await loadSession(); // Hook writes, we read
+        await processTurn(trimmed, session.getId());
+        session.reload(); // Hook writes, we read
       } catch (error) {
         console.error("\n❌ Agent error:", error);
         break;
