@@ -37,24 +37,48 @@ async function processTurn(
       allowedTools: ["Read"],
       model: "sonnet",
       settingSources: ["project"],
+      includePartialMessages: true,
     },
   });
 
+  let hasStartedResponse = false;
+
   for await (const message of agentQuery) {
-    // Handle assistant messages with text content
-    if (message.type === "assistant" && message.message?.content) {
-      console.log("\nAssistant:");
-      for (const content of message.message.content) {
-        if (content.type === "text" && content.text) {
-          console.log(content.text);
-        }
-        // Show tool usage
-        if (content.type === "tool_use" && content.name === "Read") {
-          const fileName = content.input?.file_path?.split("/").pop() || "file";
-          console.log(`\n📖 Reading ${fileName}...`);
+    // Handle streaming text deltas
+    if (message.type === "stream_event") {
+      const event = message.event;
+
+      if (
+        event.type === "content_block_start" &&
+        event.content_block?.type === "text"
+      ) {
+        if (!hasStartedResponse) {
+          console.log("\n🤖 Assistant:");
+          hasStartedResponse = true;
         }
       }
-      console.log(); // Extra newline for spacing
+
+      if (
+        event.type === "content_block_delta" &&
+        event.delta?.type === "text_delta"
+      ) {
+        process.stdout.write(event.delta.text);
+      }
+
+      if (event.type === "message_stop") {
+        console.log("\n"); // Extra newline for spacing
+        hasStartedResponse = false;
+      }
+    }
+
+    // Handle complete assistant messages (for tool use indicators)
+    if (message.type === "assistant" && message.message?.content) {
+      for (const content of message.message.content) {
+        if (content.type === "tool_use" && content.name === "Read") {
+          const fileName = content.input?.file_path?.split("/").pop() || "file";
+          console.log(`\n\n📖 Reading ${fileName}...`);
+        }
+      }
     }
 
     // Show errors

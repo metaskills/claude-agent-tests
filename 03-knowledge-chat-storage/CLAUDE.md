@@ -153,3 +153,29 @@ Without `settingSources: ["project"]`, the SDK will not load the project's setti
 3. **Transcript file** is single JSONL - easy to serialize/compress
 4. **HOME=/tmp** pattern works - SDK respects HOME for storage location
 5. Can potentially serialize session file to S3/DynamoDB between invocations
+
+### Streaming Response Implementation (2025-11-27)
+
+**Key Discovery**: Enabling real-time streaming of agent responses is straightforward with the `includePartialMessages` option.
+
+**Implementation**:
+```typescript
+query({
+  prompt: "...",
+  options: {
+    includePartialMessages: true,  // Enable streaming events
+    // ... other options
+  }
+})
+```
+
+**Handling Stream Events**:
+- `content_block_start`: Signals beginning of text content
+- `content_block_delta` with `text_delta`: Contains incremental text chunks
+- `message_stop`: Signals completion of streaming
+
+**Benefits**:
+- Real-time character-by-character display as Claude generates responses
+- Better user experience with immediate feedback
+- No changes required to session management or tool handling
+- Use `process.stdout.write()` for incremental display without newlines
