@@ -77,3 +77,7 @@ https://x.com/dani_avila7/status/1992271570891387051
 **Open Telemetry**
 
 - Does this have hooks for Langfuse?
+
+**State**
+
+- If I resume a session, where do I see all previous messages?
