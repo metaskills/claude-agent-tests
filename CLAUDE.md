@@ -21,7 +21,9 @@ All experiments are and MUST BE developed using the **`claude-agent-sdk` skill**
 
 ## Experiments
 
-- **[01-knowledge-agent](01-knowledge-agent/)** - A simple agent that reads and answers questions from local markdown files, demonstrating basic file operations and autonomous tool use.
+- **[01-knowledge-agent](01-knowledge-agent/)** - Single-shot Q&A agent that reads and answers questions from local markdown files, demonstrating basic file operations and autonomous tool use.
+- **[02-knowledge-chat](02-knowledge-chat/)** - Interactive REPL chat with session persistence and resume capability, exploring turn-based conversation patterns and CLI input.
+- **[03-knowledge-chat-storage](03-knowledge-chat-storage/)** - Deep investigation into session storage architecture, SessionStart hooks, and real-time streaming responses.
 
 ## Structure
 
