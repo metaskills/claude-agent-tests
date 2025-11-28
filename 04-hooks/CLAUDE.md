@@ -6,6 +6,8 @@ Isolated testing of all 11 Claude Agent SDK hook events. Each hook has its own t
 
 ## Hook Reference
 
+Copied From: https://x.com/dani_avila7/status/1992271570891387051
+
 | Hook Event | Key Question | When to Use | Programmatic | Declarative |
 | :--- | :--- | :--- | :---: | :---: |
 | **SessionStart** | Do I need to load initial context or set up the environment? | Use when you need to initialize the session with project context, environment variables, or run setup scripts at startup. | Failed | Passed |
