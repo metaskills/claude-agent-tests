@@ -1,6 +1,8 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { readFile } from "fs/promises";
 import { prompt, hookName } from "./prompt.ts";
 import { env } from "../shared/env.ts";
+import { validateSessionStart, printValidation } from "../shared/validate.ts";
 
 let logFilePath: string | null = null;
 
@@ -32,15 +34,28 @@ export async function runProgrammatic(): Promise<string> {
   for await (const message of agentQuery) {
     if (message.type === "result") {
       if (message.is_error) {
-        console.log("  Test failed with errors");
+        console.log("  Query failed with errors");
       } else {
-        console.log("  Test completed successfully");
+        console.log("  Query completed");
       }
     }
   }
 
+  // Verify hook actually fired
   if (!logFilePath) {
-    throw new Error("SessionStart hook did not fire");
+    console.log("  Hook did NOT fire - no log generated");
+    throw new Error("SessionStart hook did not fire (programmatic hooks may not be supported for lifecycle events)");
+  }
+
+  console.log(`  Hook fired - logged to logs/${logFilePath.split("/").pop()}`);
+
+  // Validate against SessionStartHookInput type
+  const logData = JSON.parse(await readFile(logFilePath, "utf-8"));
+  const validation = validateSessionStart(logData);
+  printValidation(validation, "SessionStartHookInput");
+
+  if (!validation.valid) {
+    throw new Error("Hook input failed type validation");
   }
 
   return logFilePath;

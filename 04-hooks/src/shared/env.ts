@@ -66,17 +66,10 @@ class Env {
       .replace(/:/g, "-")
       .replace(/\..+/, "");
 
-    const logData = {
-      ...input,
-      logged_at: new Date().toISOString(),
-      approach,
-    };
-
+    // Log pure hook input only - no test-specific additions
     const filename = `${hookName}_${approach}_${timestamp}.json`;
     const filepath = join(this.logsDir, filename);
-    await writeFile(filepath, JSON.stringify(logData, null, 2), "utf-8");
-
-    console.log(`  ${hookName} (${approach}) logged to logs/${filename}`);
+    await writeFile(filepath, JSON.stringify(input, null, 2), "utf-8");
 
     return filepath;
   }

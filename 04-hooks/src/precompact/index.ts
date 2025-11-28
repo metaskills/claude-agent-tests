@@ -8,21 +8,37 @@ console.log(`Testing ${hookName} Hook`);
 console.log("=".repeat(60));
 console.log(`\nDescription: ${description}\n`);
 
+let progLogPath: string | null = null;
+let declLogPath: string | null = null;
+let progError: Error | null = null;
+let declError: Error | null = null;
+
 try {
-  const progLogPath = await runProgrammatic();
-  const declLogPath = await runDeclarative();
-
-  if (progLogPath && declLogPath) {
-    await compareResults(progLogPath, declLogPath);
-  } else {
-    console.log("\n" + "-".repeat(60));
-    console.log("Comparison skipped - PreCompact hook did not fire");
-    console.log("This is expected for short tests (requires context overflow)");
-    console.log("-".repeat(60));
-  }
-
-  console.log("\nTest complete.");
+  progLogPath = await runProgrammatic();
+  console.log("  ✓ Programmatic test PASSED\n");
 } catch (error) {
-  console.error("\nTest failed:", (error as Error).message);
-  process.exit(1);
+  progError = error as Error;
+  console.log("  ✗ Programmatic test FAILED\n");
 }
+
+try {
+  declLogPath = await runDeclarative();
+  console.log("  ✓ Declarative test PASSED\n");
+} catch (error) {
+  declError = error as Error;
+  console.log("  ✗ Declarative test FAILED\n");
+}
+
+if (progLogPath && declLogPath) {
+  await compareResults(progLogPath, declLogPath);
+}
+
+console.log("=".repeat(60));
+console.log("Summary:");
+console.log(`  Programmatic: ${progLogPath ? "PASSED" : "FAILED"}`);
+console.log(`  Declarative:  ${declLogPath ? "PASSED" : "FAILED"}`);
+
+if (progError) console.log(`\nProgrammatic error: ${progError.message}`);
+if (declError) console.log(`\nDeclarative error: ${declError.message}`);
+
+if (progError || declError) process.exit(1);

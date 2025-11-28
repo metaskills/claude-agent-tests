@@ -1,6 +1,8 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { readFile } from "fs/promises";
 import { prompt, hookName } from "./prompt.ts";
 import { env } from "../shared/env.ts";
+import { validatePermissionRequest, printValidation } from "../shared/validate.ts";
 
 let logFilePath: string | null = null;
 
@@ -20,7 +22,6 @@ export async function runProgrammatic(): Promise<string> {
             hooks: [
               async (input) => {
                 logFilePath = await env.logHook(hookName, input, "programmatic");
-                // Auto-approve the permission request
                 return { continue: true, decision: "approve" };
               },
             ],
@@ -32,17 +33,22 @@ export async function runProgrammatic(): Promise<string> {
 
   for await (const message of agentQuery) {
     if (message.type === "result") {
-      if (message.is_error) {
-        console.log("  Test failed with errors");
-      } else {
-        console.log("  Test completed successfully");
-      }
+      console.log(message.is_error ? "  Query failed with errors" : "  Query completed");
     }
   }
 
   if (!logFilePath) {
-    throw new Error("PermissionRequest hook did not fire");
+    console.log("  Hook did NOT fire - no log generated");
+    throw new Error(`${hookName} hook did not fire`);
   }
+
+  console.log(`  Hook fired - logged to logs/${logFilePath.split("/").pop()}`);
+
+  const logData = JSON.parse(await readFile(logFilePath, "utf-8"));
+  const validation = validatePermissionRequest(logData);
+  printValidation(validation, "PermissionRequestHookInput");
+
+  if (!validation.valid) throw new Error("Hook input failed type validation");
 
   return logFilePath;
 }

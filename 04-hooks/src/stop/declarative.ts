@@ -1,11 +1,11 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { readFile } from "fs/promises";
 import { prompt, hookName } from "./prompt.ts";
 import { env } from "../shared/env.ts";
+import { validateStop, printValidation } from "../shared/validate.ts";
 
 export async function runDeclarative(): Promise<string> {
   console.log("\n--- Declarative Test ---");
-  console.log("  Note: Stop hook requires manual interruption (Ctrl+C)");
-  console.log("  This test will complete without triggering the hook");
 
   await env.setupDeclarativeSettings(hookName);
   const logsBefore = await env.getLogFiles();
@@ -23,7 +23,7 @@ export async function runDeclarative(): Promise<string> {
 
     for await (const message of agentQuery) {
       if (message.type === "result") {
-        console.log(message.is_error ? "  Test failed with errors" : "  Test completed successfully");
+        console.log(message.is_error ? "  Query failed with errors" : "  Query completed");
       }
     }
   } finally {
@@ -34,9 +34,18 @@ export async function runDeclarative(): Promise<string> {
   const newLogs = env.findNewDeclarativeLogs(logsBefore, logsAfter);
 
   if (newLogs.length === 0) {
-    console.log("  Info: Stop hook did not fire (expected - requires interruption)");
-    return "";
+    console.log("  Hook did NOT fire - no log generated");
+    throw new Error(`${hookName} hook did not fire (no declarative log found)`);
   }
 
-  return env.getLogPath(newLogs[0]);
+  const logFilePath = env.getLogPath(newLogs[0]);
+  console.log(`  Hook fired - logged to logs/${newLogs[0]}`);
+
+  const logData = JSON.parse(await readFile(logFilePath, "utf-8"));
+  const validation = validateStop(logData);
+  printValidation(validation, "StopHookInput");
+
+  if (!validation.valid) throw new Error("Hook input failed type validation");
+
+  return logFilePath;
 }
