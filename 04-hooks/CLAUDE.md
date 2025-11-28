@@ -12,21 +12,71 @@ Copied From: https://x.com/dani_avila7/status/1992271570891387051
 | :--- | :--- | :--- | :---: | :---: |
 | **SessionStart** | Do I need to load initial context or set up the environment? | Use when you need to initialize the session with project context, environment variables, or run setup scripts at startup. | ❌ | ✅ |
 | **UserPromptSubmit** | Should I add more context or validate this prompt? | Use when you want to enhance user prompts with additional information or validate/block prompts before Claude processes them. | ✅ | ✅ |
-| **PermissionRequest** | Should I auto-approve or deny this permission request? | Use when you want to automatically handle permission dialogs without user interaction, or log permission requests for auditing. | ❌ | ❌ |
+| **PermissionRequest** | Should I auto-approve or deny this permission request? | Use when you want to automatically handle permission dialogs without user interaction, or log permission requests for auditing. | ✅ | ✅ |
 | **PreToolUse** | Should I allow, modify, or block this tool execution? | Use when you need fine-grained control over tool execution, want to modify parameters, or enforce security policies before tools run. | ✅ | ✅ |
 | **PostToolUse** | Do I need to validate results or provide feedback on what executed? | Use when you want to automatically process tool results (e.g., format code, run linters) or provide feedback to Claude about what just happened. | ✅ | ✅ |
-| **Notification** | Should I notify the user in a specific way? | Use when you want to customize how Claude Code sends notifications (e.g., desktop alerts, sounds, logging). | ❌ | ❌ |
+| **Notification** | Should I notify the user in a specific way? | Use when you want to customize how Claude Code sends notifications (e.g., desktop alerts, sounds, logging). | 🌀 | 🌀 |
 | **Stop** | Did Claude complete all tasks or should it continue working? | Use when you want to verify task completion, check for errors, or force Claude to continue working on unfinished tasks. | ✅ | ✅ |
 | **SubagentStart** | Is a subagent being launched that I need to track? | Use when you want to monitor or log subagent launches, or apply policies to Task tool invocations. | ✅ | ✅ |
 | **SubagentStop** | Did the subagent finish its work or does it need to do more? | Use when you want to validate subagent completeness or ensure subagents fully complete their assigned tasks before stopping. | ✅ | ✅ |
-| **PreCompact** | Do I need to save information before compacting context? | Use when you want to preserve important context or state before Claude compacts the conversation history. | ❌ | ❌ |
+| **PreCompact** | Do I need to save information before compacting context? | Use when you want to preserve important context or state before Claude compacts the conversation history. | 🌀 | 🌀 |
 | **SessionEnd** | Should I clean up or save session statistics? | Use when you need to perform cleanup tasks, save analytics, generate reports, or archive conversation data at session end. | ❌ | ✅ |
 
+**Legend:**  
+- ✅ Working
+- ❌ Not Working
+- 🌀 Presumed Working
+
 **Test Result Notes:**
-- **SessionStart/SessionEnd**: Lifecycle hooks don't fire for programmatic SDK hooks, only declarative shell scripts
-- **PermissionRequest**: Requires tools that need permission approval (model-dependent behavior)
+- **SessionStart/SessionEnd**: Lifecycle hooks don't fire for programmatic SDK hooks, only declarative shell scripts. See [issue #83](https://github.com/anthropics/claude-agent-sdk-typescript/issues/83) for documentation request.
+- **PermissionRequest**: Only fires with CLI (not SDK) - requires human-facing permission dialog. Observe-only: can log but cannot auto-approve/deny. Test requires `--permission-mode default` and no `--dangerously-skip-permissions` flag.
 - **Notification**: May not fire in SDK-only scenarios
 - **PreCompact**: Requires long context to trigger compaction (hard to test)
+
+### Manual Testing: PermissionRequest
+
+The PermissionRequest hook was manually tested since it requires interactive CLI usage:
+
+**Prerequisites:**
+- Unalias any `claude` alias that adds `--dangerously-skip-permissions`
+- Use `--permission-mode default` to ensure permission dialogs appear
+
+**Test Command:**
+```bash
+# Copy settings file with PermissionRequest hook
+cp .claude/settings-permissionrequest.json .claude/settings.json
+
+# Run claude with permission mode that shows dialogs
+claude --permission-mode default "Run 'rm -rf /tmp/test-permissionrequest-hook' using Bash"
+
+# Check if hook fired
+cat logs/PermissionRequest_declarative.json
+
+# Cleanup
+rm .claude/settings.json
+```
+
+**Findings:**
+1. Hook fires BEFORE the user approves/denies the permission dialog
+2. Hook receives: `hook_event_name`, `tool_name`, `tool_input`, `permission_suggestions`
+3. Hook is **observe-only** - returning `{"decision": {"behavior": "allow"}}` does NOT auto-approve
+4. The user must still manually approve/deny in the CLI dialog
+5. Useful for auditing/logging permission requests, not for automation
+
+**Sample Hook Output:**
+```json
+{
+  "hook_event_name": "PermissionRequest",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rm -rf /tmp/test-permissionrequest-hook",
+    "description": "Remove test directory"
+  },
+  "permission_suggestions": [
+    {"type": "addDirectories", "directories": ["/tmp"], "destination": "session"}
+  ]
+}
+```
 
 ## Usage
 
