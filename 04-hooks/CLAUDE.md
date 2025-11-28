@@ -10,17 +10,17 @@ Copied From: https://x.com/dani_avila7/status/1992271570891387051
 
 | Hook Event | Key Question | When to Use | Programmatic | Declarative |
 | :--- | :--- | :--- | :---: | :---: |
-| **SessionStart** | Do I need to load initial context or set up the environment? | Use when you need to initialize the session with project context, environment variables, or run setup scripts at startup. | Failed | Passed |
-| **UserPromptSubmit** | Should I add more context or validate this prompt? | Use when you want to enhance user prompts with additional information or validate/block prompts before Claude processes them. | Passed | Passed |
-| **PermissionRequest** | Should I auto-approve or deny this permission request? | Use when you want to automatically handle permission dialogs without user interaction, or log permission requests for auditing. | Failed | Failed |
-| **PreToolUse** | Should I allow, modify, or block this tool execution? | Use when you need fine-grained control over tool execution, want to modify parameters, or enforce security policies before tools run. | Passed | Passed |
-| **PostToolUse** | Do I need to validate results or provide feedback on what executed? | Use when you want to automatically process tool results (e.g., format code, run linters) or provide feedback to Claude about what just happened. | Passed | Passed |
-| **Notification** | Should I notify the user in a specific way? | Use when you want to customize how Claude Code sends notifications (e.g., desktop alerts, sounds, logging). | Failed | Failed |
-| **Stop** | Did Claude complete all tasks or should it continue working? | Use when you want to verify task completion, check for errors, or force Claude to continue working on unfinished tasks. | Passed | Passed |
-| **SubagentStart** | Is a subagent being launched that I need to track? | Use when you want to monitor or log subagent launches, or apply policies to Task tool invocations. | Passed | Passed |
-| **SubagentStop** | Did the subagent finish its work or does it need to do more? | Use when you want to validate subagent completeness or ensure subagents fully complete their assigned tasks before stopping. | Passed | Passed |
-| **PreCompact** | Do I need to save information before compacting context? | Use when you want to preserve important context or state before Claude compacts the conversation history. | Failed | Failed |
-| **SessionEnd** | Should I clean up or save session statistics? | Use when you need to perform cleanup tasks, save analytics, generate reports, or archive conversation data at session end. | Failed | Passed |
+| **SessionStart** | Do I need to load initial context or set up the environment? | Use when you need to initialize the session with project context, environment variables, or run setup scripts at startup. | ❌ | ✅ |
+| **UserPromptSubmit** | Should I add more context or validate this prompt? | Use when you want to enhance user prompts with additional information or validate/block prompts before Claude processes them. | ✅ | ✅ |
+| **PermissionRequest** | Should I auto-approve or deny this permission request? | Use when you want to automatically handle permission dialogs without user interaction, or log permission requests for auditing. | ❌ | ❌ |
+| **PreToolUse** | Should I allow, modify, or block this tool execution? | Use when you need fine-grained control over tool execution, want to modify parameters, or enforce security policies before tools run. | ✅ | ✅ |
+| **PostToolUse** | Do I need to validate results or provide feedback on what executed? | Use when you want to automatically process tool results (e.g., format code, run linters) or provide feedback to Claude about what just happened. | ✅ | ✅ |
+| **Notification** | Should I notify the user in a specific way? | Use when you want to customize how Claude Code sends notifications (e.g., desktop alerts, sounds, logging). | ❌ | ❌ |
+| **Stop** | Did Claude complete all tasks or should it continue working? | Use when you want to verify task completion, check for errors, or force Claude to continue working on unfinished tasks. | ✅ | ✅ |
+| **SubagentStart** | Is a subagent being launched that I need to track? | Use when you want to monitor or log subagent launches, or apply policies to Task tool invocations. | ✅ | ✅ |
+| **SubagentStop** | Did the subagent finish its work or does it need to do more? | Use when you want to validate subagent completeness or ensure subagents fully complete their assigned tasks before stopping. | ✅ | ✅ |
+| **PreCompact** | Do I need to save information before compacting context? | Use when you want to preserve important context or state before Claude compacts the conversation history. | ❌ | ❌ |
+| **SessionEnd** | Should I clean up or save session statistics? | Use when you need to perform cleanup tasks, save analytics, generate reports, or archive conversation data at session end. | ❌ | ✅ |
 
 **Test Result Notes:**
 - **SessionStart/SessionEnd**: Lifecycle hooks don't fire for programmatic SDK hooks, only declarative shell scripts
