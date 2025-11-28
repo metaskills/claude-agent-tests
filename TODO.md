@@ -76,7 +76,10 @@ https://x.com/dani_avila7/status/1992271570891387051
 
 **Open Telemetry**
 
-- Does this have hooks for Langfuse?
+Does this have hooks for Langfuse? 
+
+https://github.com/anthropics/claude-agent-sdk-typescript/issues/82
+https://langfuse.com/docs/observability/sdk/typescript/overview.md
 
 **State**
 
