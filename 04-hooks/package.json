@@ -4,9 +4,17 @@
   "type": "module",
   "description": "Comprehensive testing of all Claude Agent SDK hooks using programmatic and declarative approaches",
   "scripts": {
-    "start": "node agent-programmatic.ts",
-    "programmatic": "node agent-programmatic.ts",
-    "declarative": "node agent-declarative.ts"
+    "pretooluse": "node src/pretooluse/index.ts",
+    "posttooluse": "node src/posttooluse/index.ts",
+    "sessionstart": "node src/sessionstart/index.ts",
+    "sessionend": "node src/sessionend/index.ts",
+    "userpromptsubmit": "node src/userpromptsubmit/index.ts",
+    "permissionrequest": "node src/permissionrequest/index.ts",
+    "notification": "node src/notification/index.ts",
+    "subagentstart": "node src/subagentstart/index.ts",
+    "subagentstop": "node src/subagentstop/index.ts",
+    "precompact": "node src/precompact/index.ts",
+    "stop": "node src/stop/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.1.55"

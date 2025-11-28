@@ -2,28 +2,31 @@
 
 ## What This Does
 
-Comprehensive testing of all 11 Claude Agent SDK hook events using both programmatic and declarative configuration approaches. This experiment demonstrates:
+Isolated testing of all 11 Claude Agent SDK hook events. Each hook has its own test directory with:
 
-1. **Programmatic hooks** - TypeScript callbacks configured via `query()` options
-2. **Declarative hooks** - Shell scripts configured via `.claude/settings.json`
-3. **Automated testing** - Pre-scripted prompts that trigger different hooks
-4. **Hook data logging** - Complete JSON logs of all hook inputs
+- **Programmatic test** - TypeScript callbacks via `query()` options
+- **Declarative test** - Shell scripts via `.claude/settings.json`
+- **Side-by-side comparison** - Compare hook data between approaches
 
-## Hook Events Tested
+## Hook Events
 
-All 11 SDK hook events:
+All 11 SDK hook events with dedicated test commands:
 
-1. **SessionStart** - Session initialization
-2. **SessionEnd** - Session cleanup
-3. **UserPromptSubmit** - User input validation/enhancement
-4. **PermissionRequest** - Permission dialog handling
-5. **PreToolUse** - Pre-execution tool control
-6. **PostToolUse** - Post-execution tool processing
-7. **Notification** - SDK notification handling
-8. **SubagentStart** - Subagent initialization
-9. **SubagentStop** - Subagent completion
-10. **PreCompact** - Pre-compaction context preservation
-11. **Stop** - Interruption handling
+| Hook | Command | Trigger |
+|------|---------|---------|
+| SessionStart | `npm run sessionstart` | Fires automatically at session start |
+| SessionEnd | `npm run sessionend` | Fires automatically at session end |
+| UserPromptSubmit | `npm run userpromptsubmit` | Fires for every user prompt |
+| PermissionRequest | `npm run permissionrequest` | Fires when tools need permission |
+| PreToolUse | `npm run pretooluse` | Fires before tool execution |
+| PostToolUse | `npm run posttooluse` | Fires after tool execution |
+| Notification | `npm run notification` | Fires for SDK notifications* |
+| SubagentStart | `npm run subagentstart` | Fires when Task tool launches* |
+| SubagentStop | `npm run subagentstop` | Fires when Task tool completes* |
+| PreCompact | `npm run precompact` | Fires before context compaction* |
+| Stop | `npm run stop` | Fires on interruption (Ctrl+C)* |
+
+*These hooks may not fire in automated tests - see notes below.
 
 ## Usage
 
@@ -33,35 +36,21 @@ All 11 SDK hook events:
 npm install
 ```
 
-### Run Programmatic Hooks Test
+### Run Individual Hook Test
 
-Tests hooks using TypeScript callbacks:
-
-```bash
-npm start
-# or
-npm run programmatic
-```
-
-Features:
-- Hooks defined in `agent-programmatic.ts`
-- TypeScript callbacks for all 11 hooks
-- `settingSources: []` to avoid loading `.claude/settings.json`
-- Summary report showing which hooks fired
-
-### Run Declarative Hooks Test
-
-Tests hooks using shell scripts:
+Each hook has its own namespaced command:
 
 ```bash
-npm run declarative
+npm run pretooluse     # Test PreToolUse hook
+npm run posttooluse    # Test PostToolUse hook
+npm run sessionstart   # Test SessionStart hook
+# etc.
 ```
 
-Features:
-- Hooks defined in `.claude/settings.json`
-- Shell scripts in `scripts/` directory
-- `settingSources: ["project"]` to load project settings
-- Each script logs to `logs/` directory
+Each test:
+1. Runs the programmatic approach (TypeScript callback)
+2. Runs the declarative approach (copies settings file, runs, removes)
+3. Compares the logged JSON data side-by-side
 
 ### View Logs
 
@@ -69,112 +58,106 @@ All hook executions are logged to `logs/` directory:
 
 ```bash
 ls -la logs/
-cat logs/SessionStart_*.json
+cat logs/PreToolUse_programmatic_*.json
+cat logs/PreToolUse_declarative_*.json
 ```
 
-Each log file contains:
+Log files include:
 - Complete hook input data (session_id, transcript_path, cwd, etc.)
 - Hook-specific fields (tool_name, prompt, etc.)
-- Timestamp of when hook was logged
+- `approach` field ("programmatic" or "declarative")
+- `logged_at` timestamp
+
+## Directory Structure
+
+```
+04-hooks/
+├── package.json                    # npm run commands for each hook
+├── .claude/
+│   ├── settings-pretooluse.json    # Per-hook settings (copied to settings.json)
+│   ├── settings-posttooluse.json
+│   └── ... (11 settings files)
+├── src/
+│   ├── shared/
+│   │   ├── hook-logger.ts          # Shared logging utility
+│   │   ├── compare.ts              # Side-by-side comparison
+│   │   └── types.ts                # Shared types
+│   ├── pretooluse/
+│   │   ├── index.ts                # Runner (tests both approaches)
+│   │   ├── programmatic.ts         # TypeScript callback test
+│   │   ├── declarative.ts          # Shell script test
+│   │   ├── hook.sh                 # Shell script for declarative
+│   │   └── prompt.ts               # Hook-specific prompt
+│   └── ... (11 hook directories total)
+├── logs/                           # JSON log files
+└── Hooks.md                        # Hook reference documentation
+```
 
 ## Architecture
 
 ### Programmatic Approach
 
 ```typescript
+// src/pretooluse/programmatic.ts
 query({
-  prompt: "...",
+  prompt: "Read the file Hooks.md...",
   options: {
-    settingSources: [], // Don't load .claude/settings.json
+    cwd: projectRoot,
+    settingSources: [],  // Don't load settings.json
     hooks: {
-      'PreToolUse': [{
+      PreToolUse: [{
         hooks: [async (input) => {
-          await logHook('PreToolUse', input);
+          await logHook("PreToolUse", input, "programmatic");
           return { continue: true };
         }]
-      }],
-      // ... all 11 hooks
+      }]
     }
   }
 });
 ```
 
-**Advantages**:
-- Type-safe hook callbacks
-- Direct access to Node.js APIs
-- Easy to implement complex logic
-- No external dependencies
-
 ### Declarative Approach
 
-**.claude/settings.json**:
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "scripts/pre-tool-use.sh"
-          }
-        ]
-      }
-    ]
-  }
+Each declarative test:
+1. Copies `.claude/settings-{hookname}.json` to `.claude/settings.json`
+2. Runs query with `settingSources: ["project"]`
+3. Removes `.claude/settings.json` after test
+
+```typescript
+// src/pretooluse/declarative.ts
+await copyFile(settingsSource, settingsTarget);
+try {
+  const agentQuery = query({
+    prompt,
+    options: {
+      cwd: projectRoot,
+      settingSources: ["project"]
+    }
+  });
+  // Process response...
+} finally {
+  await unlink(settingsTarget);
 }
 ```
 
-**Shell Script** (`scripts/pre-tool-use.sh`):
-```bash
-#!/bin/bash
-HOOK_DATA=$(cat)  # Read JSON from stdin
-TIMESTAMP=$(date +%Y-%m-%dT%H-%M-%S)
-HOOK_NAME=$(basename "$0" .sh | tr '-' '_')
+## Hook-Specific Notes
 
-# Log to file
-echo "$HOOK_DATA" | jq '.' > "../logs/${HOOK_NAME}_${TIMESTAMP}.json"
+### Reliable Hooks
+- **PreToolUse/PostToolUse** - File read triggers both reliably
+- **UserPromptSubmit** - Fires for every prompt
 
-# Log to console
-echo "🪝 ${HOOK_NAME} triggered" >&2
-```
+### May Require Investigation
+- **SessionStart/SessionEnd** - May not fire with SDK hooks
+- **PermissionRequest** - Requires tools that need permission
 
-**Advantages**:
-- Language-agnostic (any executable works)
-- Reusable across projects
-- Can be shared/distributed
-- Cleaner separation of concerns
-
-**Important**: Declarative hooks require `settingSources: ["project"]` in query options!
-
-## Test Scenarios
-
-Automated test prompts designed to trigger different hooks:
-
-1. **File read** → PreToolUse, PostToolUse
-2. **Bash command** → PermissionRequest, PreToolUse, PostToolUse
-3. **Simple question** → UserPromptSubmit only
-
-All tests trigger:
-- **SessionStart** - Once at beginning
-- **UserPromptSubmit** - For each prompt
-- **SessionEnd** - Once at end (if graceful exit)
-
-## Files
-
-- `Hooks.md` - Complete hook reference documentation
-- `agent-programmatic.ts` - Programmatic hooks test agent
-- `agent-declarative.ts` - Declarative hooks test agent
-- `src/hook-logger.ts` - Shared logging utility
-- `src/test-scenarios.ts` - Test prompts array
-- `src/session.ts` - Session management (from experiment 03)
-- `.claude/settings.json` - Declarative hook configuration
-- `scripts/*.sh` - Shell scripts for each hook (11 total)
-- `logs/` - JSON log files from hook executions
+### Hard to Trigger
+- **SubagentStart/SubagentStop** - Require Task tool usage (model-dependent)
+- **Notification** - May not fire in SDK-only scenarios
+- **PreCompact** - Requires long context to trigger compaction
+- **Stop** - Requires manual Ctrl+C interruption
 
 ## References
 
 - Hook reference: `Hooks.md`
 - TypeScript definitions: `@anthropic-ai/claude-agent-sdk/sdk.d.ts`
 - Official docs: https://platform.claude.com/docs/en/agent-sdk/typescript.md
-- Experiment 03: Session storage and hooks investigation
