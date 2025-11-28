@@ -24,6 +24,16 @@ All experiments are and MUST BE developed using the **`claude-agent-sdk` skill**
 - **[01-knowledge-agent](01-knowledge-agent/)** - Single-shot Q&A agent that reads and answers questions from local markdown files, demonstrating basic file operations and autonomous tool use.
 - **[02-knowledge-chat](02-knowledge-chat/)** - Interactive REPL chat with session persistence and resume capability, exploring turn-based conversation patterns and CLI input.
 - **[03-knowledge-chat-storage](03-knowledge-chat-storage/)** - Deep investigation into session storage architecture, SessionStart hooks, and real-time streaming responses.
+- **[04-hooks](04-hooks/)** - Comprehensive testing of all 11 Claude Agent SDK hook events with both programmatic (TypeScript callbacks) and declarative (shell scripts) approaches. Includes validation, comparison tools, and [complete hooks reference](04-hooks/Hooks.md).
+
+## Hooks Reference
+
+For comprehensive TypeScript type definitions and usage guidance for all 11 Claude Agent SDK hook events, see **[04-hooks/Hooks.md](04-hooks/Hooks.md)**.
+
+Key findings from hook testing:
+- **SessionStart/SessionEnd**: Lifecycle hooks only work with declarative (shell script) configuration, not programmatic callbacks in SDK
+- **PermissionRequest**: Observe-only hook that logs permission requests but cannot auto-approve/deny
+- **Easy reference table**: See [04-hooks/CLAUDE.md](04-hooks/CLAUDE.md) for a table of all hook names, key questions, and "when to use" recommendations
 
 ## Structure
 

@@ -4,6 +4,8 @@
 
 Isolated testing of all 11 Claude Agent SDK hook events. Each hook has its own test directory that runs both programmatic (TypeScript callbacks) and declarative (shell scripts) approaches, then compares the results.
 
+**📚 For complete TypeScript type definitions, hook input structures, and usage examples, see [Hooks.md](Hooks.md).**
+
 ## Hook Reference
 
 Copied From: https://x.com/dani_avila7/status/1992271570891387051
@@ -22,10 +24,12 @@ Copied From: https://x.com/dani_avila7/status/1992271570891387051
 | **PreCompact** | Do I need to save information before compacting context? | Use when you want to preserve important context or state before Claude compacts the conversation history. | 🌀 | 🌀 |
 | **SessionEnd** | Should I clean up or save session statistics? | Use when you need to perform cleanup tasks, save analytics, generate reports, or archive conversation data at session end. | ❌ | ✅ |
 
-**Legend:**  
+**Legend:**
 - ✅ Working
 - ❌ Not Working
 - 🌀 Presumed Working
+
+**Quick Reference:** Use the table above for quick lookup of hook names, key questions to ask yourself, and "when to use" recommendations. For detailed TypeScript types and complete data structures, see [Hooks.md](Hooks.md).
 
 **Test Result Notes:**
 - **SessionStart/SessionEnd**: Lifecycle hooks don't fire for programmatic SDK hooks, only declarative shell scripts. See [issue #83](https://github.com/anthropics/claude-agent-sdk-typescript/issues/83) for documentation request.
@@ -196,6 +200,6 @@ Each declarative test:
 
 ## References
 
-- Hook reference: `Hooks.md`
+- **[Hooks.md](Hooks.md)** - Complete hook reference with TypeScript type definitions, input/output structures, and "when to use" guidance for all 11 hook events
 - TypeScript definitions: `@anthropic-ai/claude-agent-sdk/sdk.d.ts`
 - Official docs: https://platform.claude.com/docs/en/agent-sdk/typescript.md

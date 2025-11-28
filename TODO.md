@@ -80,6 +80,7 @@ Does this have hooks for Langfuse?
 
 https://github.com/anthropics/claude-agent-sdk-typescript/issues/82
 https://langfuse.com/docs/observability/sdk/typescript/overview.md
+https://github.com/traceloop/openllmetry-js/tree/main/packages/instrumentation-anthropic
 
 **State**
 
