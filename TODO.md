@@ -68,20 +68,6 @@ Assistant:
 
 ## To Ask
 
-**Hooks**
-
-https://x.com/dani_avila7/status/1992271570891387051
-
-- Can I use a hook to upate local docs on init?
-
-**Open Telemetry**
-
-Does this have hooks for Langfuse? 
-
-https://github.com/anthropics/claude-agent-sdk-typescript/issues/82
-https://langfuse.com/docs/observability/sdk/typescript/overview.md
-https://github.com/traceloop/openllmetry-js/tree/main/packages/instrumentation-anthropic
-
 **State**
 
 - If I resume a session, where do I see all previous messages?
