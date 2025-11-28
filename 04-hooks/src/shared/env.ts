@@ -24,12 +24,12 @@ class Env {
     return join(this.claudeDir, "settings.json");
   }
 
-  async getLogFiles(): Promise<string[]> {
-    try {
-      const files = await readdir(this.logsDir);
-      return files.filter((f) => f.endsWith(".json"));
-    } catch {
-      return [];
+  async cleanLogs(): Promise<void> {
+    const files = await readdir(this.logsDir).catch(() => []);
+    for (const file of files) {
+      if (file.endsWith(".json")) {
+        await unlink(join(this.logsDir, file));
+      }
     }
   }
 
@@ -42,35 +42,15 @@ class Env {
     await unlink(this.settingsPath).catch(() => {});
   }
 
-  findNewDeclarativeLogs(logsBefore: string[], logsAfter: string[]): string[] {
-    return logsAfter.filter(
-      (log) => !logsBefore.includes(log) && log.includes("declarative")
-    );
-  }
-
-  findNewProgrammaticLogs(logsBefore: string[], logsAfter: string[]): string[] {
-    return logsAfter.filter(
-      (log) => !logsBefore.includes(log) && log.includes("programmatic")
-    );
-  }
-
-  getLogPath(filename: string): string {
-    return join(this.logsDir, filename);
+  getExpectedLogPath(hookName: string, approach: Approach): string {
+    return join(this.logsDir, `${hookName}_${approach}.json`);
   }
 
   async logHook(hookName: string, input: HookInput, approach: Approach): Promise<string> {
     await mkdir(this.logsDir, { recursive: true });
-
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/:/g, "-")
-      .replace(/\..+/, "");
-
-    // Log pure hook input only - no test-specific additions
-    const filename = `${hookName}_${approach}_${timestamp}.json`;
+    const filename = `${hookName}_${approach}.json`;
     const filepath = join(this.logsDir, filename);
     await writeFile(filepath, JSON.stringify(input, null, 2), "utf-8");
-
     return filepath;
   }
 }

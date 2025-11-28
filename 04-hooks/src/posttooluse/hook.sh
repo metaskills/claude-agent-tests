@@ -1,7 +1,6 @@
 #!/bin/bash
 HOOK_DATA=$(cat)
-TIMESTAMP=$(date +%Y-%m-%dT%H-%M-%S)
 HOOK_NAME="PostToolUse"
 LOGS_DIR="logs"
 mkdir -p "$LOGS_DIR"
-echo "$HOOK_DATA" > "$LOGS_DIR/${HOOK_NAME}_declarative_${TIMESTAMP}.json"
+echo "$HOOK_DATA" > "$LOGS_DIR/${HOOK_NAME}_declarative.json"
