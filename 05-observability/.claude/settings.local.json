@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/dev/null <<'EOF'\nThis is a validation command to ensure Write tool will work for plan file\nEOF)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

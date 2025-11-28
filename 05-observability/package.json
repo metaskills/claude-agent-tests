@@ -1,0 +1,27 @@
+{
+  "name": "claude-observability-test",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Test Claude Agent SDK native OpenTelemetry instrumentation",
+  "scripts": {
+    "start": "node agent.ts",
+    "resume": "node agent.ts --resume",
+    "test:no-telemetry": "node agent.ts",
+    "test:with-telemetry": "CLAUDE_CODE_ENABLE_TELEMETRY=1 node agent.ts",
+    "test:automated": "./test-telemetry.sh"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.55",
+    "@inquirer/prompts": "^8.0.1",
+    "@opentelemetry/sdk-node": "^0.54.0",
+    "@opentelemetry/sdk-metrics": "^1.28.0",
+    "@opentelemetry/sdk-logs": "^0.55.0",
+    "@opentelemetry/resources": "^1.28.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0",
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  }
+}
