@@ -1,0 +1,18 @@
+{
+  "name": "claude-hooks-testing",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Comprehensive testing of all Claude Agent SDK hooks using programmatic and declarative approaches",
+  "scripts": {
+    "start": "node agent-programmatic.ts",
+    "programmatic": "node agent-programmatic.ts",
+    "declarative": "node agent-declarative.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.55"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  }
+}
