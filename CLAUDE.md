@@ -25,6 +25,7 @@ All experiments are and MUST BE developed using the **`claude-agent-sdk` skill**
 - **[02-knowledge-chat](02-knowledge-chat/)** - Interactive REPL chat with session persistence and resume capability, exploring turn-based conversation patterns and CLI input.
 - **[03-knowledge-chat-storage](03-knowledge-chat-storage/)** - Deep investigation into session storage architecture, SessionStart hooks, and real-time streaming responses.
 - **[04-hooks](04-hooks/)** - Comprehensive testing of all 11 Claude Agent SDK hook events with both programmatic (TypeScript callbacks) and declarative (shell scripts) approaches. Includes validation, comparison tools, and [complete hooks reference](04-hooks/Hooks.md).
+- **[05-observability](05-observability/)** - Tests whether Claude Agent SDK has native OpenTelemetry instrumentation. Discovers that `CLAUDE_CODE_ENABLE_TELEMETRY` works with Claude Code CLI but NOT with programmatic Agent SDK. Documents correct OTel configuration (metrics/logs, not traces) and implications for production observability.
 
 ## Hooks Reference
 
