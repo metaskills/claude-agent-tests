@@ -1,7 +1,6 @@
+# Misc Learnings
 
-
-
-
+---
 
 ## Explain What Explicit `resume: sessionId` (vs implicit `continue: true`) Means
 
@@ -76,3 +75,98 @@ When maxTurns is reached, you receive an SDKResultMessage with:
 | Feature development    | 10-20                | Planning, implementation, verification |
 | Codebase analysis      | 5-15                 | Research across multiple files         |
 | Unlimited exploration  | undefined            | Trust agent stopping conditions        |
+
+---
+
+## Multiple Messages in a Single Query
+
+Pattern: Use an async generator to yield multiple SDKUserMessage objects:
+
+```javascript
+async function* multipleMessages() {
+ yield {
+   type: 'user',
+   message: {
+     role: 'user',
+     content: 'First message'
+   },
+   parent_tool_use_id: null,
+   session_id: 'your-session-id'
+ };
+
+ yield {
+   type: 'user',
+   message: {
+     role: 'user',
+     content: 'Second message'
+   },
+   parent_tool_use_id: null,
+   session_id: 'your-session-id'
+ };
+}
+
+const result = query({
+ prompt: multipleMessages(),
+ options: { /* ... */ }
+});
+```
+
+Source: /node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts:623
+- prompt accepts: string | AsyncIterable<SDKUserMessage>
+
+### File Attachments
+
+**Pattern**: Use content blocks within the message structure:
+
+```javascript
+const messageWithImage: SDKUserMessage = {
+ type: 'user',
+ message: {
+   role: 'user',
+   content: [
+     {
+       type: 'text',
+       text: 'What do you see in this image?'
+     },
+     {
+       type: 'image',
+       source: {
+         type: 'base64',
+         data: 'your_base64_encoded_image_data',
+         media_type: 'image/jpeg'  // or 'image/png', 'image/gif', 'image/webp'
+       }
+     }
+   ]
+ },
+ parent_tool_use_id: null,
+ session_id: 'your-session-id'
+};
+
+const result = query({
+ prompt: async function*() { yield messageWithImage; }(),
+ options: { /* ... */ }
+});
+```
+
+Supported Content Block Types:
+1. Text: `{ type: 'text', text: 'string' }`
+2. Image: `{ type: 'image', source: { type: 'base64', data: '...', media_type: 'image/jpeg' } }`
+3. Document: `{ type: 'document', source: { type: 'base64', data: '...', media_type: 'application/pdf' } }`
+
+### Key Points:
+
+- For simple strings, use prompt: "your message" directly
+- For multi-message or file attachments, use AsyncIterable<SDKUserMessage>
+- message.content can be a string OR an array of content blocks
+- Images/documents use base64 encoding
+- Each SDKUserMessage wraps a standard Anthropic API MessageParam
+
+### References:
+
+- SDK types: node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts:311-332
+- API docs: https://platform.claude.com/docs/en/api/messages
+
+---
+
+
+
