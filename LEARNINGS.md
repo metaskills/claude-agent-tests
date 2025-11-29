@@ -168,5 +168,92 @@ Supported Content Block Types:
 
 ---
 
+## System Prompt Patterns in Claude Agent SDK
 
+Based on the official documentation, the Claude Agent SDK provides four recommended patterns for customizing system prompts:
+
+### 1. `systemPrompt` Option (Programmatic)
+
+The `query()` function accepts a `systemPrompt` parameter with two formats:
+
+**Custom System Prompt (Full Replacement):**
+
+```javascript
+query({
+  prompt: "Your task",
+  options: {
+    systemPrompt: "You are a specialized assistant that..."
+  }
+})
+```
+
+**Preset with Append (Recommended):**
+
+```javascript
+query({
+  prompt: "Your task",
+  options: {
+    systemPrompt: {
+      type: 'preset',
+      preset: 'claude_code',
+      append: "Additional instructions here. Focus on security best practices."
+    }
+  }
+})
+```
+
+**Key Difference:**
+
+- Full replacement: Total control but loses default tools/behavior
+- Preset + append: Extends Claude Code's default behavior while preserving tools
+
+### 2. CLAUDE.md Files (Project Context)
+
+Markdown files containing project-specific instructions:
+
+**Configuration:**
+
+```javascript
+query({
+  prompt: "Your task",
+  options: {
+    settingSources: ['project']  // Required to load .claude/CLAUDE.md
+  }
+})
+```
+
+**File Locations:**
+
+- `.claude/CLAUDE.md` - Project-specific instructions (checked into git)
+- `~/.claude/CLAUDE.md` - Global user instructions
+
+**Best for**: Team-shared context, coding standards, project conventions
+
+### 3. Output Styles (Persistent Behavior)
+
+Saved configurations stored as markdown files in `~/.claude/output-styles/`.
+
+**Best for**: Creating specialized assistants with reusable, persistent behavior modifications across sessions.
+
+*(Note: This is more relevant for CLI usage than programmatic SDK usage)*
+
+### 4. Subagents with Custom Prompts
+
+Define specialized subagents programmatically:
+
+```javascript
+query({
+  prompt: "Your task",
+  options: {
+    agents: [
+      {
+        name: "security-analyzer",
+        systemPrompt: "You are a security-focused code reviewer..."
+      }
+    ]
+  }
+})
+```
+
+**Best for**: Multi-agent architectures with specialized roles
 
