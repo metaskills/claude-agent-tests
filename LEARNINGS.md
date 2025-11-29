@@ -172,6 +172,10 @@ Supported Content Block Types:
 
 Based on the official documentation, the Claude Agent SDK provides four recommended patterns for customizing system prompts:
 
+> [!NOTE]
+> Default behavior: The Agent SDK uses an empty system prompt by default for maximum flexibility. 
+
+
 ### 1. `systemPrompt` Option (Programmatic)
 
 The `query()` function accepts a `systemPrompt` parameter with two formats:
