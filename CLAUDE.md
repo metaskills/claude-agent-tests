@@ -19,6 +19,10 @@ Experiments access these via `process.env` and assume they are set in your shell
 
 All experiments are and MUST BE developed using the **`claude-agent-sdk` skill** in Claude Code. This ensures consistent patterns and best practices while providing practical examples for learning.
 
+## Background Research
+
+- **[00-email-agent](00-email-agent/)** - Comprehensive analysis of Anthropic's [email-agent demo](https://github.com/anthropics/claude-agent-sdk-demos/tree/main/email-agent). Documents SDK integration patterns, MCP tool architecture, subagent usage, action/listener skills, `.claude/` directory conventions, and context-aware output strategies for managing information flow.
+
 ## Experiments
 
 - **[01-knowledge-agent](01-knowledge-agent/)** - Single-shot Q&A agent that reads and answers questions from local markdown files, demonstrating basic file operations and autonomous tool use.
