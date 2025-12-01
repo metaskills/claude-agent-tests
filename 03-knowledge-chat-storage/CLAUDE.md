@@ -145,13 +145,42 @@ Without `settingSources: ["project"]`, the SDK will not load the project's setti
 **Session Storage Location**:
 - Session transcript: `~/.claude/projects/{sanitized-cwd}/{session-id}.jsonl`
 - Single JSONL file per session (not a complex directory structure)
-- Can control location via `HOME` environment variable
+- ⚠️ See "Controlling Session Storage Location" below for serverless best practices
+
+**⚠️ CRITICAL: Controlling Session Storage Location**
+
+The SDK uses `HOME` environment variable by default for session storage. **This is problematic in serverless environments** because modifying `HOME` affects all tools/libraries in your process.
+
+**❌ Don't Do This (Invasive)**:
+```typescript
+// Modifies HOME globally - affects ALL tools/libraries
+process.env.HOME = '/tmp';
+query({ prompt: "...", options: { ... } })
+// Sessions stored in /tmp/.claude/projects/...
+```
+
+**✅ Better Approach (Isolated)**:
+```typescript
+// Use CLAUDE_HOME for Claude-specific storage (non-invasive)
+process.env.CLAUDE_HOME = '/tmp/claude-sessions';
+query({ prompt: "...", options: { ... } })
+// Sessions stored in /tmp/claude-sessions/projects/...
+```
+
+**Key Benefits**:
+- No side effects on other tools (AWS SDK, file operations, etc.)
+- Precise control over Claude session storage
+- Clean separation of concerns in Lambda/serverless environments
+
+**References**:
+- GitHub Issue: https://github.com/anthropics/claude-agent-sdk-typescript/issues/84
+- Alternative: `CLAUDE_CONFIG_DIR` may also be supported (verify in SDK docs)
 
 **Lambda Implications**:
 1. **SessionStart hook** can trigger setup logic on first invocation
 2. **Session ID** available immediately for storage in DynamoDB
 3. **Transcript file** is single JSONL - easy to serialize/compress
-4. **HOME=/tmp** pattern works - SDK respects HOME for storage location
+4. **Use CLAUDE_HOME=/tmp/claude-sessions** for isolated storage control
 5. Can potentially serialize session file to S3/DynamoDB between invocations
 
 ### Streaming Response Implementation (2025-11-27)
